@@ -1,0 +1,138 @@
+1. Git = Basically git is a distributed version control system.Now we firstly need to know what is version control system.
+A version control system is a kind of software that helps the developer teams to efficiently communicate well and collaborate well and manage(track) all the changes that have been made to the source code along with the basic information e.g. = who made the changes and what changes have been made.
+
+Let's understand the version control system by using an example:
+Suppose a developers team work on an application and they collaborate by using a version control system and they add some new functionality in their application and commit changes but the updated version not work proprerly so in that case the version control system keep track of our work their changes so with the help of version control system we can omit the new changes and continue with the previous version.
+
+Now there are three types of version control system:
+(i) Local Version Control System = It is the simplest version control system and it basically use the database to kept all the changes to file under revision control.
+It is very space efficient because it kept only the changes in their database.
+(ii) Centralized version control system = In centralized version control system,they just kept one repository globally and every user need to commit for reflecting their changes in the repository.Also the other developer see our changes by updating.
+Benifit = The collaboration amongs the developer.
+Disadvantage = 1.A developer need a permanent internet connection or If internet or server goes down during the time of collaborate then the version not saved properly.
+2.What if the hard disk of the centralized database get corrupted then everything is finished.
+(iii) Distributed version control system = It is a version control system that allow developers to work on local copies of project.It means that they can work offline or remotly and then syns their changes with the server.A distributed version control system also enable different branching strategy , which further improve the speed and quality of the software development.Git is the example of ditributed version control system.
+Git is a popular,free and open source,fast and scalable.
+
+
+2. Github = In simple term,github is a website that allow developers to store and manage their code using git.You only need to create an account and create a repository.
+After that you can either add files in it from your laptop/pc using git commands.Or either you can directly write code in it by using github codespace.
+Github codespace is similar to the vscode where you write your code,delete your code,update your code,add new file.After that you only have to commit the changes by clicking on the "source control" options.
+
+
+3. Getting started with git commands:sccccccvvbbbbnnmm
+
+Firstly download the git bash software. Secondly, after downloading open the git bash and done some git configuaration task.Basically in these configuaration you connect your git with your github account.So its important you already have a github account.
+
+1. Steps for git configuration:
+1.Open git bash and write command "git --version" it is used to check your github version.
+2. Write command " git config --global user.name "your github account user name" ".
+3. Write command " git config --global user.email "your email which you used while creating you github account" ".
+4. Write command to check the list of changes we done "git config --list" ".
+
+Now you done your configuaration part your git is setup.After that the rest of the command you can be run on your git bash but it is recommended to run the further commands by using your vscode terminal because most of the time we write our code in vscode.
+
+2. Step for clone repository and make changes in them:
+
+1.In this we create a empty repository in github with a readme file after that copy their https link.
+2.Open your vscode terminal and write a command to clone the repository in your vscode command is = git clone "link of repository".You see your repository will be cloned in your vscode with the exact readme file.After that write command in your terminal to go inside that cloned folder. command is = cd cloned_folder_name.
+
+3.Now you can change,update,delete,add new file anything you have to do.
+4.After that we have a status command which is used to check the status of your local repository with corresponding to the main repository.It means that if you done any change in your local repository after that you run the status command the files names are appeared in red color which are not in syns with the main repository.
+command is = git status
+
+5. To maintain in sync you need to "add and commit" changes.But one thing you need to keep that in your mind you add and commit only when you confident about your code or you really want to add changes in your main repository.If you don't want no use add and commit command.
+add command is = git add "file_name which you update or newly create"
+                     or 
+                git add .  
+commit command is = git commit -m "commit message(basically in commit message you add what change you done)"
+
+Now the "add" command set your changes in the staging area.The "commit" command save your changes in your local repository but the changes are not reflected in the main repository.To reflect them in your main repository you need to write a push command.
+
+6. push command is = git push origin main.
+where origin = It is the name of your root repository.Always similar.
+main = It is your main branching.If you work with any other branch write that name.
+
+7.changes successfully reflected in your github.Now if you write the git status command you see every file is in green color.It means your local and main file is in sync.
+
+Note = 1. All commands we used in the above procedure:
+(i) git clone repository_link = It is used to clone the repository.
+(ii) cd clone_repository_name = It is used to go inside the cloned folder.
+(ii) git status = Used to check the status of your local repository.
+(iii) git add file_name or git add . = Used to set the files to the staging area.
+(iv) git commit -m "commit message" = Used to commit/save the changes to your local repository.
+(v) git push origin main = Used to save changes to your remote repository.
+
+2.Work Flow:
+clone github repository -> go inside clone folder -> make change -> check status ->Set files on staging area using add command ->Save on changes on your local repository using commmit command->Save change on your remote repository using push command. 
+
+
+3. Now in some case there must be a case where you start your project from your laptop and after that you save your project on the github in those case you need to add three extra command.
+Procedure = 1. Make your projects.
+2.After that you need to initialize git in your folder.
+command is = git init
+3. After that you need to use add and commit command in order to save the changes in your local repository.
+4. After that you need to create you origin(it means repository).For this firstly create a empty repository in your github and copy link.After that write command:
+command is = git remote add origin new_repository_link
+5.After that you need to change your branch.To see your branch we write command "git branch".You see your by default branch name is master,but change it into main by suing command:
+command is = git branch -m or -M main
+After that you simply push your code in your remote repository by using command:
+command is = git push origin main
+
+Note = 1. All commands we used in the above procedure:
+(i) git init = It is used to initialize the git in your forlder.
+(ii) git status = Used to check the status of your local repository.
+(iii) git add file_name or git add . = Used to set the files to the staging area.
+(iv) git commit -m "commit message" = Used to commit/save the changes to your local repository.
+(v) git remote add origin new_repository_link = It is used to make your origin.
+(vi) git branch = Used to check your current branch.
+(vii) git branch -m or -M main = Used to change your branch name from master to main.
+(viii) git push origin main = Used to reflect changes in your remote repository.
+
+
+2.Work Flow:
+initialize git using init command -> check status ->Set files on staging area using add command ->Save on changes on your local repository using commmit command->Create origin using remote command -> check your current branch->change your current branch name from master to main->Save change on your remote repository using push command. 
+
+
+4. Now Suppose you done all changes in your github remote repository by using the codespace or either explicitly but those changes does'nt reflected in your local repository.But if you want to see remote repository changes in your local repository you simple use pull command.
+command is = git pull origin main
+
+5.Branches = Basically a branch is a separate version of the repository that diverge from the main working projects.It allow it allow us to work on different part of the project without impact the main branch.when work is complete the branch is mergered with the main branch.Branches are also called the pointers which point to the snapshot of your change.
+Branches commands:
+1.git branch = to check the current branch or total numbers of available branches.
+2.git branch -M new_name = It is used to change your current branch name.
+3.git checkout branch_name = It is used to navigate from your current branch to any other existing branch.
+3.git checkout -b new_branch_name = It is used to create new branch.
+4.git branch -d branch_name = It is used to delete any branch.
+
+
+6. Merge commands = Basically after craeting two or more branches we need to merge.
+Merge commands:
+1.git diff branch_name= It is used to show difference between the current and the other branche.
+2.git merge branch_name = It is used to merge the main branch with the any other branch and vice versa.
+                              or 
+You can also merge by using pull request in github.
+
+
+7.Undo commands = Some times there might be a case we need to roll back our changes becasue of any resons in that case we can use the undo commands.
+For add command:
+1.git reset file_name or git reset = It is used to undo the add command.
+
+For commit command:
+1.git reset head~1 = It is used to undo the commit command.
+
+For undoing any previous commit:
+1.git log = It is used to check the history of your commits.
+2.git reset hash_code = It is used to undo any previous commit.Hash_code available from the history.
+3.git reset --hard hash_code = It is used to undo changes from both git and code.
+
+
+8.Fork = Forking a repository in GitHub creates a copy of the repository on your GitHub account. This is useful when you want to work on someone else’s project and make changes that are inappropriate for the original repository. You can also use forks to propose changes related to fixing a bug1. To fork a repository, you can follow these steps:
+1.Open any repository on Github.
+2.Click on the Fork button in the header of a repository.
+Wait for a few seconds. You will see that the newly forked repository gets created under your GitHub account.
+
+
+asdfghjklqwreetrrtiyuoopiwqwertyuopp[zxcbn,.'\\\
+'[...,./
+

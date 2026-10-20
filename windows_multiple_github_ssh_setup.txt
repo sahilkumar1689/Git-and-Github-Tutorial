@@ -1,0 +1,279 @@
+SSH Setup Guide for Multiple GitHub Accounts on Windows
+========================================================
+
+Purpose
+-------
+This guide explains how to configure SSH keys for multiple GitHub accounts on
+Windows, test each account, and use the correct account when cloning or
+working with repositories.
+
+Important concepts
+------------------
+- SSH authentication determines which GitHub account you authenticate as.
+- Git commit identity (user.name and user.email) determines the author shown
+  on commits. These are separate settings.
+- Never share or upload a private key. Only share the matching .pub file.
+- For a work account, consider creating a separate key for each device,
+  especially on employer-managed machines, so a key can be revoked independently.
+
+1. Check your current SSH setup
+-------------------------------
+Open PowerShell:
+
+    $HOME
+    Test-Path "$HOME\.ssh"
+    Get-ChildItem "$HOME\.ssh" -Force
+    ssh -V
+    Get-Service ssh-agent
+    ssh-add -l
+
+Notes:
+- If the .ssh directory does not exist, that is okay; you can create it.
+- If ssh-add -l says there are no identities, no keys are currently loaded.
+- If the ssh-agent service is stopped, start it in the next step.
+
+2. Create a separate SSH key for an account
+-------------------------------------------
+Create the SSH directory if needed:
+
+    New-Item -ItemType Directory -Force "$HOME\.ssh"
+
+Generate an ED25519 key. Change the account label and filename for each
+account, and do not overwrite an existing key:
+
+    ssh-keygen -t ed25519 -C "personal-github-key" -f "$HOME\.ssh\id_ed25519_personal"
+
+For a work account, use a different filename:
+
+    ssh-keygen -t ed25519 -C "work-github-key" -f "$HOME\.ssh\id_ed25519_work"
+
+When prompted, set a strong passphrase if practical. The command creates:
+- id_ed25519_personal       (private key; keep secret)
+- id_ed25519_personal.pub   (public key; add this to GitHub)
+- id_ed25519_work           (private key; keep secret)
+- id_ed25519_work.pub       (public key; add this to GitHub)
+
+If these keys already exist, do not generate them again or overwrite them.
+Continue with the existing files.
+
+3. Start ssh-agent and load your keys
+-------------------------------------
+If the service is stopped, open PowerShell as Administrator and run:
+
+    Set-Service -Name ssh-agent -StartupType Automatic
+    Start-Service -Name ssh-agent
+
+Then in your normal PowerShell window, add each key:
+
+    ssh-add "$HOME\.ssh\id_ed25519_personal"
+    ssh-add "$HOME\.ssh\id_ed25519_work"
+
+Verify the keys loaded:
+
+    ssh-add -l
+
+If you see both key fingerprints and labels, they are loaded into the agent.
+
+4. Add each public key to the correct GitHub account
+----------------------------------------------------
+Display a public key:
+
+    Get-Content "$HOME\.ssh\id_ed25519_personal.pub"
+
+Copy the complete output and sign in to the PERSONAL GitHub account. Add it at:
+
+    https://github.com/settings/keys
+
+Choose "New SSH key", give it a recognizable title such as "Personal Windows
+Laptop", paste the public key, and save.
+
+Repeat for the work key while signed in to the WORK GitHub account:
+
+    Get-Content "$HOME\.ssh\id_ed25519_work.pub"
+
+Add it at the same GitHub SSH keys page, but ensure you are signed in to the
+work account.
+
+Security:
+- Upload only files ending in .pub.
+- Never paste or upload id_ed25519_personal or id_ed25519_work without .pub.
+- A public key should generally be added to the account it is intended to
+  authenticate as.
+
+5. Create the SSH config file
+-----------------------------
+The config file must be named exactly "config" with no .txt extension. Its
+location is:
+
+    $HOME\.ssh\config
+
+Open it in Notepad:
+
+    notepad "$HOME\.ssh\config"
+
+Put the following in the file:
+
+    Host github-personal
+        HostName github.com
+        User git
+        IdentityFile ~/.ssh/id_ed25519_personal
+        IdentitiesOnly yes
+
+    Host github-work
+        HostName github.com
+        User git
+        IdentityFile ~/.ssh/id_ed25519_work
+        IdentitiesOnly yes
+
+Save the file. If Notepad creates config.txt, rename it:
+
+    Rename-Item "$HOME\.ssh\config.txt" "config"
+
+Only run the rename command if the file is actually named config.txt. Check
+the filename with:
+
+    Get-ChildItem "$HOME\.ssh" -Force
+
+The Host values (github-personal and github-work) are aliases you choose.
+They tell SSH which key to use for each connection.
+
+6. Test both GitHub accounts
+-----------------------------
+Run:
+
+    ssh -T git@github-personal
+    ssh -T git@github-work
+
+The first time you connect, SSH may ask you to trust github.com. Verify the
+server fingerprint against GitHub's official documentation before accepting:
+
+    https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+
+After the host is trusted, successful authentication typically says something
+like:
+
+    Hi YOUR-USERNAME! You've successfully authenticated, but GitHub does not provide shell access.
+
+This message is expected. GitHub does not provide an interactive shell over
+SSH. Check that each greeting shows the intended account.
+
+If a test fails, use verbose mode to diagnose it:
+
+    ssh -vT git@github-personal
+    ssh -vT git@github-work
+
+7. Clone repositories using the correct account
+------------------------------------------------
+Personal repository:
+
+    git clone git@github-personal:PERSONAL_USERNAME/REPOSITORY.git
+
+Work repository:
+
+    git clone git@github-work:WORK_ORG/REPOSITORY.git
+
+Replace the uppercase placeholders with the actual owner/organization and
+repository names. The repository must grant the selected GitHub account access.
+
+For an existing repository, inspect its remote:
+
+    git remote -v
+
+To change its origin to use the work alias:
+
+    git remote set-url origin git@github-work:WORK_ORG/REPOSITORY.git
+
+Or use the personal alias:
+
+    git remote set-url origin git@github-personal:PERSONAL_USERNAME/REPOSITORY.git
+
+8. Set the correct Git commit identity
+--------------------------------------
+SSH authentication and commit identity are independent. Check your global
+identity:
+
+    git config --global user.name
+    git config --global user.email
+
+Your global identity is used by repositories unless overridden locally. For a
+work repository, go into that repository's folder and set its identity:
+
+    git config --local user.name "Your Work Name"
+    git config --local user.email "your.work.email@company.com"
+
+For a personal repository, you can set a personal identity locally:
+
+    git config --local user.name "Your Personal Name"
+    git config --local user.email "your.personal.email@example.com"
+
+Verify the effective values inside a repository:
+
+    git config user.name
+    git config user.email
+
+Use an email address appropriate for the account and your organization's
+commit-signing or privacy requirements. These commands do not change which
+SSH key is used; the SSH remote alias controls that.
+
+9. Common checks and troubleshooting
+------------------------------------
+List SSH files:
+
+    Get-ChildItem "$HOME\.ssh" -Force
+
+List keys loaded in ssh-agent:
+
+    ssh-add -l
+
+Check SSH configuration parsing and selected settings:
+
+    ssh -G github-personal
+    ssh -G github-work
+
+Test with debug output:
+
+    ssh -vT git@github-personal
+    ssh -vT git@github-work
+
+Check repository remote and commit identity:
+
+    git remote -v
+    git config user.name
+    git config user.email
+
+Common issues:
+- "Permission denied (publickey)": verify the public key was added to the
+  intended GitHub account, the correct private key is listed in config, and
+  the key is loaded or otherwise accessible.
+- Both aliases greet the same GitHub user: check the IdentityFile entries,
+  ensure IdentitiesOnly yes is present, and confirm each public key was added
+  to the intended account.
+- "config.txt" exists instead of "config": rename it to exactly "config".
+- You can authenticate but cannot clone a repository: authentication may be
+  working, but the account may not have repository permission or the owner/name
+  in the remote URL may be wrong.
+- Git commits show the wrong author: configure user.name and user.email in the
+  repository; changing SSH keys will not fix commit metadata.
+
+10. Moving to a new computer
+----------------------------
+Recommended approach:
+1. Generate new keys on the new computer, particularly for work accounts.
+2. Add the new public key to the appropriate GitHub account.
+3. Configure ssh-agent and the ~/.ssh/config file on that computer.
+4. Test each alias with ssh -T.
+5. Set or verify Git commit identity in each repository.
+
+If you intentionally reuse keys, transfer private keys securely and never
+send them through chat, email, or shared folders. Remove old public keys from
+GitHub when the old device is retired or the key is no longer needed.
+
+Quick checklist
+---------------
+[ ] Separate key pair for each account
+[ ] Public key added to the matching GitHub account
+[ ] ssh-agent running and keys loaded
+[ ] ~/.ssh/config exists with no .txt extension
+[ ] Each ssh -T alias greets the intended GitHub username
+[ ] Repository remote uses the intended SSH alias
+[ ] Repository user.name and user.email are correct
